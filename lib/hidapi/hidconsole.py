@@ -15,6 +15,7 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import argparse
+import contextlib
 import os
 import os.path
 import platform
@@ -90,7 +91,7 @@ def _continuous_read(handle, timeout=2000):
         try:
             reply = hidapi.read(handle, 128, timeout)
         except OSError as e:
-            _error(f"Read failed, aborting: {str(e)}", True)
+            _error(f"Read failed, aborting: {e!s}", True)
             break
         assert reply is not None
         if reply:
@@ -101,7 +102,7 @@ def _validate_input(line, hidpp=False):
     try:
         data = unhexlify(line.encode("ascii"))
     except Exception as e:
-        _error(f"Invalid input: {str(e)}")
+        _error(f"Invalid input: {e!s}")
         return None
 
     if hidpp:
@@ -202,11 +203,8 @@ def main():
 
         if args.history is None:
             args.history = os.path.join(os.path.expanduser("~"), ".hidconsole-history")
-        try:
+        with contextlib.suppress(Exception):
             readline.read_history_file(args.history)
-        except Exception:
-            # file may not exist yet
-            pass
 
     try:
         t = Thread(target=_continuous_read, args=(handle,))
@@ -232,7 +230,7 @@ def main():
             hidapi.write(handle, data)
             # wait for some kind of reply
             if args.hidpp and not interactive:
-                rlist, wlist, xlist = select([handle], [], [], 1)
+                _rlist, _wlist, _xlist = select([handle], [], [], 1)
                 if data[1:2] == b"\xff":
                     # the receiver will reply very fast, in a few milliseconds
                     time.sleep(0.010)
@@ -241,7 +239,7 @@ def main():
                     time.sleep(0.700)
     except EOFError:
         if interactive:
-            print("")
+            print()
         else:
             time.sleep(1)
 

@@ -204,7 +204,8 @@ responses_remap = [  # responses for Persistent Remappable Actions at 0x04 and r
     Response("0052", 0x0420, "02FF"),
     Response("0052000100510000", 0x0430, "0052FF"),  # key DOWN
     Response("050002", 0x0000, "1B04"),  # REPROGRAMMABLE_KEYS_V4
-] + responses_key
+    *responses_key,
+]
 
 responses_gestures = [  # the commented-out messages are not used by either the setting or other testing
     Response("4203410141020400320480148C21A301", 0x0400, "0000"),  # items
@@ -264,8 +265,8 @@ zone_responses_2 = [  # responses for RGB EFFECTS
     Response("0000000300040005", 0x0700, "000000"),
     Response("0001000200080009", 0x0700, "000100"),
 ]
-effects_responses_1 = [Response("0100000001", 0x0700)] + zone_responses_1
-effects_responses_2 = [Response("FFFF0100000001", 0x0700, "FFFF00")] + zone_responses_2
+effects_responses_1 = [Response("0100000001", 0x0700), *zone_responses_1]
+effects_responses_2 = [Response("FFFF0100000001", 0x0700, "FFFF00"), *zone_responses_2]
 
 responses_profiles = [  # OnboardProfile in RAM
     Response("0104010101020100FE0200", 0x0900),
@@ -415,7 +416,8 @@ class Device:
             self.responses = [
                 Response("010001", 0x0000, "0001"),
                 Response("20", 0x0100),
-            ] + self.responses
+                *self.responses,
+            ]
             self.responses.append(
                 Response(
                     f"{int(self.offset):0>2X}00{int(self.version):0>2X}",

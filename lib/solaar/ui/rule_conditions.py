@@ -155,7 +155,7 @@ class FeatureUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return f"{str(component.feature)} ({int(component.feature or 0):04X})"
+        return f"{component.feature!s} ({int(component.feature or 0):04X})"
 
 
 class ReportUI(ConditionUI):
@@ -278,7 +278,7 @@ class KeyUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return f"{str(component.key)} ({int(component.key):04X}) ({_(component.action)})" if component.key else "None"
+        return f"{component.key!s} ({int(component.key):04X}) ({_(component.action)})" if component.key else "None"
 
 
 class KeyIsDownUI(ConditionUI):
@@ -319,7 +319,7 @@ class KeyIsDownUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return f"{str(component.key)} ({int(component.key):04X})" if component.key else "None"
+        return f"{component.key!s} ({int(component.key):04X})" if component.key else "None"
 
 
 class TestUI(ConditionUI):
@@ -383,7 +383,7 @@ class TestUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        return component.test + (f" {repr(component.parameter)}" if component.parameter is not None else "")
+        return component.test + (f" {component.parameter!r}" if component.parameter is not None else "")
 
 
 @dataclass
@@ -415,8 +415,8 @@ class TestBytesUI(ConditionUI):
     _modes = {
         "range": TestBytesMode(
             _("range"),
-            _common_elements
-            + [
+            [
+                *_common_elements,
                 TestBytesElement("minimum", _("minimum"), _global_min, _global_max),  # uint32
                 TestBytesElement("maximum", _("maximum"), _global_min, _global_max),
             ],
@@ -424,7 +424,7 @@ class TestBytesUI(ConditionUI):
         ),
         "mask": TestBytesMode(
             _("mask"),
-            _common_elements + [TestBytesElement("mask", _("mask"), _global_min, _global_max)],
+            [*_common_elements, TestBytesElement("mask", _("mask"), _global_min, _global_max)],
             lambda e: _("bytes %(0)d to %(1)d, mask %(2)d" % {str(i): v for i, v in enumerate(e)}),
         ),
     }
@@ -467,7 +467,7 @@ class TestBytesUI(ConditionUI):
         super().show(component, editable)
 
         with self.ignore_changes():
-            mode_id = {3: "mask", 4: "range"}.get(len(component.test), None)
+            mode_id = {3: "mask", 4: "range"}.get(len(component.test))
             self._only_mode(mode_id)
             if not mode_id:
                 return
@@ -494,11 +494,11 @@ class TestBytesUI(ConditionUI):
         super()._on_update(*args)
         if not self.component:
             return
-        begin, end, *etc = self.component.test
+        begin, end, *_etc = self.component.test
         icon = "dialog-warning" if end <= begin else ""
         self.fields["end"].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         if len(self.component.test) == 4:
-            *etc, minimum, maximum = self.component.test
+            *_etc, minimum, maximum = self.component.test
             icon = "dialog-warning" if maximum < minimum else ""
             self.fields["maximum"].set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
 
@@ -508,7 +508,7 @@ class TestBytesUI(ConditionUI):
 
     @classmethod
     def right_label(cls, component):
-        mode_id = {3: "mask", 4: "range"}.get(len(component.test), None)
+        mode_id = {3: "mask", 4: "range"}.get(len(component.test))
         if not mode_id:
             return str(component.test)
         return TestBytesUI._modes[mode_id].label_fn(component.test)
@@ -560,7 +560,7 @@ class MouseGestureUI(ConditionUI):
         return btn
 
     def _clicked_add(self, _btn):
-        self.component.__init__(self.collect_value() + [""], warn=False)
+        self.component.__init__([*self.collect_value(), ""], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.movements) - 1].grab_focus()
 

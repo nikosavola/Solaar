@@ -66,7 +66,7 @@ def _quantize_coeffs(b0, b1, b2, a1, a2):
     scales = [2**31, 2**30, 2**31, 2**30, 2**31]  # b0, b1, b2, a1, a2
     words = []
     for val, scale in zip([b0, b1, b2, a1, a2], scales):
-        q = int(round(val * scale))
+        q = round(val * scale)
         q = max(-(1 << 31), min((1 << 31) - 1, q))
         q = q & 0xFFFFFF00  # 24-bit precision (low byte always zero)
         words.append((q >> 16) & 0xFFFF)  # high word
@@ -103,7 +103,7 @@ def _build_coeff_section(bands, sample_rate, section_type=1):
         all_words.extend(_quantize_coeffs(b0 / rescale, b1 / rescale, b2 / rescale, a1, a2))
 
     # Rescale factor as Q6.26, 24-bit precision
-    rs = int(round(rescale * (1 << 26)))
+    rs = round(rescale * (1 << 26))
     rs = max(-(1 << 31), min((1 << 31) - 1, rs)) & 0xFFFFFF00
     all_words.append((rs >> 16) & 0xFFFF)
     all_words.append(rs & 0xFFFF)

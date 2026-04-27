@@ -87,7 +87,7 @@ class KeyPressUI(ActionUI):
 
     def _clicked_add(self, _btn):
         keys, action = self.component.regularize_args(self.collect_value())
-        self.component.__init__([keys + [""], action], warn=False)
+        self.component.__init__([[*keys, ""], action], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.key_names) - 1].grab_focus()
 
@@ -292,7 +292,7 @@ class ExecuteUI(ActionUI):
         return btn
 
     def _clicked_add(self, *_args):
-        self.component.__init__(self.collect_value() + [""], warn=False)
+        self.component.__init__([*self.collect_value(), ""], warn=False)
         self.show(self.component, editable=True)
         self.fields[len(self.component.args) - 1].grab_focus()
 

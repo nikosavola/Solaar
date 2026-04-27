@@ -73,7 +73,7 @@ class Setting:
     def build(cls, device):
         assert cls.feature or cls.register, "Settings require either a feature or a register"
         rw_class = cls.rw_class if hasattr(cls, "rw_class") else FeatureRW if cls.feature else RegisterRW
-        rw = rw_class(cls.feature if cls.feature else cls.register, **cls.rw_options)
+        rw = rw_class(cls.feature or cls.register, **cls.rw_options)
         p = device.protocol
         if p == 1.0:  # HID++ 1.0 devices do not support features
             assert rw.kind == RegisterRW.kind
@@ -736,7 +736,7 @@ class ActionSettingRW:
                             self.release_action()
                         else:
                             for key in cids:
-                                if key and not key == self.key.key:  # some other diverted key pressed
+                                if key and key != self.key.key:  # some other diverted key pressed
                                     self.key_action(key)
                 elif n.address == 0x10:
                     if self.pressed:

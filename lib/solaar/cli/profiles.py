@@ -47,7 +47,7 @@ def run(receivers, args, find_receiver, find_device):
         print(yaml.dump(dev.profiles))
     else:
         try:
-            with open(profiles_file, "r") as f:
+            with open(profiles_file) as f:
                 print(f"Reading profiles from {profiles_file}")
                 profiles = yaml.safe_load(f)
                 if not isinstance(profiles, OnboardProfiles):

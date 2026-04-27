@@ -229,7 +229,7 @@ def test_device_receiver(number, pairing_info, responses, handle, _name, codenam
     assert test_device.name == name
 
     assert test_device == test_device
-    assert not (test_device != test_device)
+    assert test_device == test_device
     assert bool(test_device)
 
     test_device.__del__()
@@ -271,7 +271,7 @@ def test_device_ids(number, info, responses, handle, unitId, modelId, task_id, k
     assert test_device.modelId == modelId
     assert test_device.tid_map == task_id
     assert test_device.kind == kind
-    assert test_device.firmware == firmware or len(test_device.firmware) > 0 and firmware is True
+    assert test_device.firmware == firmware or (len(test_device.firmware) > 0 and firmware is True)
     assert test_device.id == id
     assert test_device.power_switch_location == psl
     assert test_device.polling_rate == rate
@@ -303,7 +303,7 @@ def test_device_complex(device_info, responses, protocol, led, keys, remap, gest
     test_device._protocol = protocol
     spy_request = mocker.spy(test_device, "request")
 
-    assert type(test_device.led_effects) == led
+    assert type(test_device.led_effects) is led
     if keys is None:
         assert test_device.keys == keys
     else:

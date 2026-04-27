@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from __future__ import annotations  # noqa:F407
+from __future__ import annotations
 
 import functools
 import struct
@@ -777,7 +777,7 @@ class ReportDescriptor:
                 )
                 self._append_item(offset_list, pool, report_id, item)
 
-    def _parse(self, level: int = 0, file: TextIO = sys.stdout) -> None:  # noqa: C901
+    def _parse(self, level: int = 0, file: TextIO = sys.stdout) -> None:
         offset_input: Dict[Optional[int], int] = {
             None: 0,
         }
@@ -936,7 +936,7 @@ class ReportDescriptor:
             ]
         return ", ".join(fields)
 
-    def print(self, level: int = 0, file: TextIO = sys.stdout) -> None:  # noqa: C901
+    def print(self, level: int = 0, file: TextIO = sys.stdout) -> None:
         def printl(string: str) -> None:
             print(" " * level + string, file=file)
 

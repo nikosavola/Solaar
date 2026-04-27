@@ -280,7 +280,7 @@ def kbdgroup():
 def modifier_code(keycode):
     if wayland or not x11_setup() or keycode == 0:
         return None
-    for m in range(0, len(modifier_keycodes)):
+    for m in range(len(modifier_keycodes)):
         if keycode in modifier_keycodes[m]:
             return m
 
@@ -518,7 +518,7 @@ class Not(Condition):
         self.component = self.compile(op)
 
     def __str__(self):
-        return f"Not: {str(self.component)}"
+        return f"Not: {self.component!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -631,7 +631,7 @@ class Process(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return f"Process: {str(self.process)}"
+        return f"Process: {self.process!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -662,7 +662,7 @@ class MouseProcess(Condition):
             self.process = str(process)
 
     def __str__(self):
-        return f"MouseProcess: {str(self.process)}"
+        return f"MouseProcess: {self.process!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -687,7 +687,7 @@ class Feature(Condition):
                 logger.warning("rule Feature argument not name of a feature: %s", feature)
 
     def __str__(self):
-        return f"Feature: {str(self.feature)}"
+        return f"Feature: {self.feature!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -708,7 +708,7 @@ class Report(Condition):
             self.report = report
 
     def __str__(self):
-        return f"Report: {str(self.report)}"
+        return f"Report: {self.report!s}"
 
     def evaluate(self, report, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -781,7 +781,7 @@ class Modifiers(Condition):
                     logger.warning("unknown rule Modifier value: %s", k)
 
     def __str__(self):
-        return f"Modifiers: {str(self.desired)}"
+        return f"Modifiers: {self.desired!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -891,7 +891,7 @@ def bit_test(start, end, bits):
 def range_test(start, end, min, max):
     def range_test_helper(_f, _r, d):
         value = int.from_bytes(d[start:end], byteorder="big", signed=True)
-        return min <= value <= max and (value if value else True)
+        return min <= value <= max and (value or True)
 
     return range_test_helper
 
@@ -927,7 +927,7 @@ class Test(Condition):
                 logger.warning("rule Test argument not valid %s", test)
 
     def __str__(self):
-        return f"Test: {str(self.test)}"
+        return f"Test: {self.test!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -955,7 +955,7 @@ class TestBytes(Condition):
                 logger.warning("rule TestBytes argument not valid %s", test)
 
     def __str__(self):
-        return f"TestBytes: {str(self.test)}"
+        return f"TestBytes: {self.test!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1030,7 +1030,7 @@ class Active(Condition):
         self.devID = devID
 
     def __str__(self):
-        return f"Active: {str(self.devID)}"
+        return f"Active: {self.devID!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1051,7 +1051,7 @@ class Device(Condition):
         self.devID = devID
 
     def __str__(self):
-        return f"Device: {str(self.devID)}"
+        return f"Device: {self.devID!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1076,7 +1076,7 @@ class Host(Condition):
         self.host = host
 
     def __str__(self):
-        return f"Host: {str(self.host)}"
+        return f"Host: {self.host!s}"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.DEBUG):
@@ -1114,8 +1114,8 @@ def keysym_to_keycode(keysym, _modifiers) -> Tuple[int, int]:  # maybe should ta
         return keycode, level
 
     for k in keycodes.keys:  # mappings for group 0 where keycode only has group 0 mappings
-        if 0 == k.group and k.keycode < 256 and (level is None or k.level < level):
-            (a, m, vs) = gkeymap.get_entries_for_keycode(k.keycode)
+        if k.group == 0 and k.keycode < 256 and (level is None or k.level < level):
+            (a, m, _vs) = gkeymap.get_entries_for_keycode(k.keycode)
             if a and all(mk.group == 0 for mk in m):
                 keycode = k.keycode
                 level = k.level
@@ -1130,7 +1130,7 @@ class KeyPress(Action):
                 logger.warning("rule KeyPress keys not key names %s", self.keys_names)
             self.key_symbols = []
         else:
-            self.key_symbols = [XK_KEYS.get(k, None) for k in self.key_names]
+            self.key_symbols = [XK_KEYS.get(k) for k in self.key_names]
         if not all(self.key_symbols):
             if warn:
                 logger.warning("rule KeyPress keys not key names %s", self.key_names)
@@ -1155,11 +1155,11 @@ class KeyPress(Action):
 
     def mods(self, level, modifiers, direction):
         if level == 2 or level == 3:
-            (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("ISO_Level3_Shift"), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
         if level == 1 or level == 3:
-            (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L", None), modifiers)
+            (sk, _) = keysym_to_keycode(XK_KEYS.get("Shift_L"), modifiers)
             if sk and self.needed(sk, modifiers):
                 simulate_key(sk, direction)
 
@@ -1216,7 +1216,7 @@ class MouseScroll(Action):
     def __init__(self, amounts, warn=True):
         if len(amounts) == 1 and isinstance(amounts[0], list):
             amounts = amounts[0]
-        if not (len(amounts) == 2 and all([isinstance(a, numbers.Number) for a in amounts])):
+        if not (len(amounts) == 2 and all(isinstance(a, numbers.Number) for a in amounts)):
             if warn:
                 logger.warning("rule MouseScroll argument not two numbers %s", amounts)
             amounts = [0, 0]
@@ -1265,11 +1265,11 @@ class MouseClick(Action):
                 self.count = 1
 
     def __str__(self):
-        return f"MouseClick: {self.button} ({str(self.count)})"
+        return f"MouseClick: {self.button} ({self.count!s})"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
-            logger.info(f"MouseClick action: {str(self.count)} {self.button}")
+            logger.info(f"MouseClick action: {self.count!s} {self.button}")
         if self.button and self.count:
             click(buttons[self.button], self.count)
         time.sleep(0.01)
@@ -1337,7 +1337,7 @@ class Execute(Action):
             self.args = args
 
     def __str__(self):
-        return "Execute: " + " ".join([a for a in self.args])
+        return "Execute: " + " ".join(self.args)
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if logger.isEnabledFor(logging.INFO):
@@ -1368,7 +1368,7 @@ class Later(Action):
             self.components = self.rule.components
 
     def __str__(self):
-        return f"Later: [{str(self.delay)}, " + ", ".join(str(c) for c in self.components) + "]"
+        return f"Later: [{self.delay!s}, " + ", ".join(str(c) for c in self.components) + "]"
 
     def evaluate(self, feature, notification: HIDPPNotification, device, last_result):
         if self.delay and self.rule:
@@ -1530,7 +1530,7 @@ def _save_config_rule_file(file_name: str = _file_path):
         # 'version': (1, 3),  # it would be printed for every rule
     }
     # Save only user-defined rules
-    rules_to_save = sum((r.data()["Rule"] for r in rules.components if r.source == file_name), [])
+    rules_to_save = [item for r in rules.components if r.source == file_name for item in r.data()["Rule"]]
     if logger.isEnabledFor(logging.INFO):
         logger.info("saving %d rule(s) to %s", len(rules_to_save), file_name)
     try:

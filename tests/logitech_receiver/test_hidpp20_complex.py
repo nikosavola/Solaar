@@ -325,12 +325,14 @@ def test_reprogrammable_key_v4_set(responses, index, diverted, persistently_dive
 )
 def test_remappable_action(r, index, cid, actionId, remapped, mask, status, action, modifiers, byts, remap, mocker):
     if int(remap, 16) == special_keys.KEYS_Default:
-        responses = r + [
+        responses = [
+            *r,
             fake_hidpp.Response("040000", 0x0000, "1C00"),
             fake_hidpp.Response("00", 0x450, f"{cid:04X}" + "FF"),
         ]
     else:
-        responses = r + [
+        responses = [
+            *r,
             fake_hidpp.Response("040000", 0x0000, "1C00"),
             fake_hidpp.Response("00", 0x440, f"{cid:04X}" + "FF" + remap),
         ]
@@ -741,7 +743,7 @@ def test_LEDZoneInfo(feature, function, offset, effect_function, responses, inde
     assert zone.location == location
     assert zone.count == count
     assert len(zone.effects) == count
-    assert zone.effects[1].ID == id_1
+    assert id_1 == zone.effects[1].ID
 
 
 @pytest.mark.parametrize(
@@ -961,7 +963,7 @@ def test_centurion_sub_device_feature_discovery():
         # CenturionRoot(idx=0).GetFeature(func=0) with feature_id=0x0001 -> sub_fs_index=1
         (0x00, 0x00, "0001"): bytes([0x01, 0x00, 0x00]),
         # CenturionFeatureSet(idx=1).GetFeatureId(func=0x10, start=0) -> 3 features
-        # Response: [count, (feat_hi, feat_lo, type, flags) × count]
+        # Response: [count, (feat_hi, feat_lo, type, flags) × count]  # noqa: RUF003
         (0x01, 0x10, "00"): bytes(
             [
                 0x03,  # 3 features

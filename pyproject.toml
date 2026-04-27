@@ -1,14 +1,31 @@
 [tool.ruff]
 line-length = 127
-target-version = "py37"
+target-version = "py38"
 
 [tool.ruff.lint]
 select = [
-    "F", # Pyflakes
-    "E", # pycodestyle
-    "W", # pycodestyle
-    "B", # flake8-bugbear
-    "I", # isort
+    "F",    # Pyflakes
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "B",    # flake8-bugbear
+    "I",    # isort
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
+    "PIE",  # flake8-pie
+    "SIM",  # flake8-simplify
+    "RUF",  # Ruff-specific rules
+    "PERF", # Perflint
+    "FURB", # refurb
+]
+ignore = [
+    "RUF012",  # mutable-class-default - too many changes for this codebase style
+    "UP006",   # non-pep585-annotation - requires `from __future__ import annotations` in many files
+    "UP007",   # non-pep604-annotation-union - requires `from __future__ import annotations` in many files
+    "UP031",   # printf-string-formatting - prevalent style in this codebase
+    "UP045",   # non-pep604-annotation-optional - requires `from __future__ import annotations` in many files
+    "PERF203", # try-except-in-loop - sometimes necessary for error handling patterns
+    "SIM102",  # collapsible-if - can reduce readability in complex conditions
+    "SIM108",  # if-else-block-instead-of-if-exp - can reduce readability
 ]
 
 [tool.ruff.lint.isort]

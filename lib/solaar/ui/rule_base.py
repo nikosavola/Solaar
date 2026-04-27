@@ -13,6 +13,8 @@
 ## You should have received a copy of the GNU General Public License along
 ## with this program; if not, write to the Free Software Foundation, Inc.,
 ## 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import annotations
+
 import abc
 
 from contextlib import contextmanager as contextlib_contextmanager
@@ -52,7 +54,7 @@ class CompletionEntry(Gtk.Entry):
 class RuleComponentUI(abc.ABC):
     CLASS = diversion.RuleComponent
 
-    def __init__(self, panel, on_update: Callable = None):
+    def __init__(self, panel, on_update: Callable | None = None):
         self.panel = panel
         self.widgets = {}  # widget -> coord. in grid
         self.component = None

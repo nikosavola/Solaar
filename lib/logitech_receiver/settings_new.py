@@ -105,7 +105,7 @@ class Setting:
 
     def write(self, value, save=True):
         """Write the value to the device.  If saved is True also save in the persister"""
-        pass  ## fill out
+        ## fill out
 
     def apply(self):
         """Write saved data to the device, using persisted data if available"""

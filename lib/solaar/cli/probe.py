@@ -42,7 +42,7 @@ def run(receivers, args, find_receiver, _ignore):
 
     _print_receiver(receiver)
 
-    print("")
+    print()
     print("  Register Dump")
     rgst = receiver.read_register(Registers.NOTIFICATIONS)
     print("    Notifications         %#04x: %s" % (Registers.NOTIFICATIONS % 0x100, f"0x{strhex(rgst)}" if rgst else "None"))
@@ -56,13 +56,13 @@ def run(receivers, args, find_receiver, _ignore):
         "    Device Activity       %#04x: %s" % (Registers.DEVICES_ACTIVITY % 0x100, f"0x{strhex(rgst)}" if rgst else "None")
     )
 
-    for sub_reg in range(0, 16):
+    for sub_reg in range(16):
         rgst = receiver.read_register(Registers.RECEIVER_INFO, sub_reg)
         print(
             "    Pairing Register %#04x %#04x: %s"
             % (Registers.RECEIVER_INFO % 0x100, sub_reg, f"0x{strhex(rgst)}" if rgst else "None")
         )
-    for device in range(0, 7):
+    for device in range(7):
         for sub_reg in [0x10, 0x20, 0x30, 0x50]:
             rgst = receiver.read_register(Registers.RECEIVER_INFO, sub_reg + device)
             print(
@@ -86,18 +86,18 @@ def run(receivers, args, find_receiver, _ignore):
                     rgst[3 : 3 + ord(rgst[2:3])] if rgst else "None",
                 )
             )
-    for sub_reg in range(0, 5):
+    for sub_reg in range(5):
         rgst = receiver.read_register(Registers.FIRMWARE, sub_reg)
         print(
             "    Firmware         %#04x %#04x: %s"
             % (Registers.FIRMWARE % 0x100, sub_reg, f"0x{strhex(rgst)}" if rgst is not None else "None")
         )
 
-    print("")
-    for reg in range(0, 0xFF):
+    print()
+    for reg in range(0xFF):
         for offset, reg_type in [(0x00, "Short"), (0x200, "Long")]:
             last = None
-            for sub in range(0, 0xFF):
+            for sub in range(0xFF):
                 rgst = base.request(receiver.handle, 0xFF, 0x8100 | (offset + reg), sub, return_error=True)
                 if isinstance(rgst, int) and rgst == ErrorCode.INVALID_ADDRESS:
                     break

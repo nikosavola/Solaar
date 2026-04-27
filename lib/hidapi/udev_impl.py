@@ -46,7 +46,7 @@ if typing.TYPE_CHECKING:
     import gi
 
     gi.require_version("Gdk", "3.0")
-    from gi.repository import GLib  # NOQA: E402
+    from gi.repository import GLib
 
 logger = logging.getLogger(__name__)
 
@@ -107,13 +107,13 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 rd = ReportDescriptor(fd.read())
-            hidpp_short = 0x10 in rd.input_report_ids and 6 * 8 == int(rd.get_input_report_size(0x10))
+            hidpp_short = 0x10 in rd.input_report_ids and int(rd.get_input_report_size(0x10)) == 6 * 8
             # and _Usage(0xFF00, 0x0001) in rd.get_input_items(0x10)[0].usages  # be more permissive
-            hidpp_long = 0x11 in rd.input_report_ids and 19 * 8 == int(rd.get_input_report_size(0x11))
+            hidpp_long = 0x11 in rd.input_report_ids and int(rd.get_input_report_size(0x11)) == 19 * 8
             # and _Usage(0xFF00, 0x0002) in rd.get_input_items(0x11)[0].usages  # be more permissive
             # Centurion transport: report ID 0x51, 63-byte reports (usage page 0xFFA0)
             centurion = (
-                0x51 in rd.input_report_ids and 63 * 8 == int(rd.get_input_report_size(0x51)) and 0x51 in rd.output_report_ids
+                0x51 in rd.input_report_ids and int(rd.get_input_report_size(0x51)) == 63 * 8 and 0x51 in rd.output_report_ids
             )
         if not hidpp_short and not hidpp_long and not centurion:
             return
@@ -170,7 +170,7 @@ def _match(action: str, device, filter_func: typing.Callable[[int, int, int, boo
             isDevice=isDevice,
             hidpp_short=hidpp_short,
             hidpp_long=hidpp_long,
-            centurion=centurion if centurion else False,
+            centurion=centurion or False,
         )
         return d_info
 
@@ -201,7 +201,7 @@ def find_paired_node(receiver_path: str, index: int, timeout: int):
     if not receiver_phys:
         return None
 
-    phys = f"{receiver_phys}:{index}"  # noqa: E231
+    phys = f"{receiver_phys}:{index}"
     timeout += time()
     delta = time()
     while delta < timeout:
@@ -222,7 +222,7 @@ def find_paired_node_wpid(receiver_path: str, index: int):
     if not receiver_phys:
         return None
 
-    phys = f"{receiver_phys}:{index}"  # noqa: E231
+    phys = f"{receiver_phys}:{index}"
     for dev in context.list_devices(subsystem="hidraw"):
         dev_phys = dev.find_parent("hid").get("HID_PHYS")
         if dev_phys and dev_phys == phys:
@@ -398,7 +398,7 @@ def read(device_handle, bytes_count, timeout_ms=-1):
     """
     assert device_handle
     timeout = None if timeout_ms < 0 else timeout_ms / 1000.0
-    rlist, wlist, xlist = select([device_handle], [], [device_handle], timeout)
+    rlist, _wlist, xlist = select([device_handle], [], [device_handle], timeout)
 
     if xlist:
         assert xlist == [device_handle]

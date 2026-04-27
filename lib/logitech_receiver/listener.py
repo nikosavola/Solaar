@@ -30,7 +30,7 @@ class _ThreadedHandle:
     Closing a ThreadedHandle will close all handles.
     """
 
-    __slots__ = ("path", "_local", "_handles", "_listener")
+    __slots__ = ("_handles", "_listener", "_local", "path")
 
     def __init__(self, listener, path, handle):
         assert listener is not None
@@ -168,11 +168,9 @@ class EventsListener(threading.Thread):
     def has_started(self):
         """Called right after the thread has started, and before it starts
         reading notification packets."""
-        pass
 
     def has_stopped(self):
         """Called right before the thread stops."""
-        pass
 
     def _notifications_hook(self, n):
         # Only consider unhandled notifications that were sent from this thread,

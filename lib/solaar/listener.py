@@ -44,7 +44,7 @@ from .ui import common
 if typing.TYPE_CHECKING:
     from hidapi.common import DeviceInfo
 
-gi.require_version("Gtk", "3.0")  # NOQA: E402
+gi.require_version("Gtk", "3.0")
 from gi.repository import GLib  # NOQA: E402 # isort:skip
 
 if typing.TYPE_CHECKING:
@@ -187,7 +187,7 @@ class SolaarListener(listener.EventsListener):
 
         if n.sub_id == 0x41:
             if not already_known:
-                if n.address == 0x0A and not self.receiver.receiver_kind == "bolt":
+                if n.address == 0x0A and self.receiver.receiver_kind != "bolt":
                     # some Nanos send a notification even if no new pairing - check that there really is a device there
                     if (
                         self.receiver.read_register(

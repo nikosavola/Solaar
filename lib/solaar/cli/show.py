@@ -246,7 +246,7 @@ def _print_device(dev, num=None):
                     flags = ord(flags[1:2])
                     flag_names = common.flag_names(hidpp20_constants.FeatureFlag, flags)
                     version = dev.features.get_feature_version(feature_int)
-                    version = version if version else 0
+                    version = version or 0
                     print(
                         "        %2d: %-22s {%04X} V%s    %s "
                         % (index, display_name, feature_int, version, ", ".join(flag_names))
@@ -364,7 +364,7 @@ def _print_device(dev, num=None):
                 if bands:
                     print(f"            EQ: {', '.join(f'{f}Hz:{g:+d}dB' for f, g, _q in bands)}")
             elif hidpp20.battery_functions.get(feature, None):
-                print("", end="       ")
+                print(end="       ")
                 _battery_line(dev)
             for setting in dev_settings:
                 if setting.feature == feature:
@@ -393,13 +393,13 @@ def _print_device(dev, num=None):
             if dev.keys.keyversion == SupportedFeature.REPROG_CONTROLS_V4:
                 print("        %2d: %-26s, default: %-27s => %-26s" % (k.index, k.key, k.default_task, k.mapped_to))
                 gmask_fmt = ",".join(k.group_mask)
-                gmask_fmt = gmask_fmt if gmask_fmt else "empty"
+                gmask_fmt = gmask_fmt or "empty"
                 flag_names = list(common.flag_names(hidpp20.KeyFlag, k.flags.value))
                 print(
                     f"             {', '.join(flag_names)}, pos:{int(k.pos)}, group:{int(k.group):1}, group mask:{gmask_fmt}"
                 )
                 report_fmt = list(common.flag_names(hidpp20.MappingFlag, k.mapping_flags.value))
-                report_fmt = report_fmt if report_fmt else "default"
+                report_fmt = report_fmt or "default"
                 print(f"             reporting: {report_fmt}")
     if dev.online and dev.remap_keys:
         print(f"     Has {len(dev.remap_keys)} persistent remappable keys:")
@@ -430,7 +430,7 @@ def run(devices, args, find_receiver, find_device):
     assert args.device
 
     print(f"{NAME.lower()} version {__version__}")
-    print("")
+    print()
 
     device_name = args.device.lower()
 
@@ -441,15 +441,15 @@ def run(devices, args, find_receiver, find_device):
                 count = d.count()
                 if count:
                     for dev in d:
-                        print("")
+                        print()
                         _print_device(dev, dev.number)
                         count -= 1
                         if not count:
                             break
-                print("")
+                print()
             else:
                 _print_device(d)
-                print("")
+                print()
         return
 
     dev = find_receiver(devices, device_name)

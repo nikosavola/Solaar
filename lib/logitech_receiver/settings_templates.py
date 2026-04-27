@@ -532,7 +532,7 @@ class OnboardProfiles(settings.Setting):
                 profile_change(device, common.bytes2int(data_bytes))
             return result
 
-    class validator_class(settings_validator.ChoicesValidator):
+    class validator_class(settings_validator.ChoicesValidator):  # noqa: F811
         @classmethod
         def build(cls, setting_class, device):
             headers = hidpp20.OnboardProfiles.get_profile_headers(device)
@@ -569,11 +569,8 @@ class ReportRate(settings.Setting):
             #    return None  # host mode borks the function keys on the G915 TKL keyboard
             reply = device.feature_request(_F.REPORT_RATE, 0x00)
             assert reply, "Oops, report rate choices cannot be retrieved!"
-            rate_list = []
             rate_flags = common.bytes2int(reply[0:1])
-            for i in range(0, 8):
-                if (rate_flags >> i) & 0x01:
-                    rate_list.append(setting_class.choices_universe[i + 1])
+            rate_list = [setting_class.choices_universe[i + 1] for i in range(8) if (rate_flags >> i) & 0x01]
             return cls(choices=common.NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
@@ -599,11 +596,8 @@ class ExtendedReportRate(settings.Setting):
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.EXTENDED_ADJUSTABLE_REPORT_RATE, 0x10)
             assert reply, "Oops, report rate choices cannot be retrieved!"
-            rate_list = []
             rate_flags = common.bytes2int(reply[0:2])
-            for i in range(0, 7):
-                if rate_flags & (0x01 << i):
-                    rate_list.append(setting_class.choices_universe[i])
+            rate_list = [setting_class.choices_universe[i] for i in range(7) if rate_flags & (0x01 << i)]
             return cls(choices=common.NamedInts.list(rate_list), byte_count=1) if rate_list else None
 
 
@@ -989,7 +983,7 @@ class DivertKeys(settings.Settings):
 
 def produce_dpi_list(feature, function, ignore, device, direction):
     dpi_bytes = b""
-    for i in range(0, 0x100):  # there will be only a very few iterations performed
+    for i in range(0x100):  # there will be only a very few iterations performed
         reply = device.feature_request(feature, function, 0x00, direction, i)
         assert reply, "Oops, DPI list cannot be retrieved!"
         dpi_bytes += reply[ignore:]
@@ -1209,7 +1203,7 @@ class Multiplatform(settings.Setting):
                     if version == 0:
                         return ""
                     elif version & 0xFF:
-                        return f"{str(version >> 8)}.{str(version & 0xFF)}"
+                        return f"{version >> 8!s}.{version & 0xFF!s}"
                     else:
                         return str(version >> 8)
 
@@ -1221,7 +1215,7 @@ class Multiplatform(settings.Setting):
             if not (flags & 0x02):  # can't set platform so don't create setting
                 return []
             descriptors = []
-            for index in range(0, num_descriptors):
+            for index in range(num_descriptors):
                 descriptor = device.feature_request(_F.MULTIPLATFORM, 0x10, index)
                 platform, _ignore, os_flags, low, high = struct.unpack("!BBHHH", descriptor[:8])
                 descriptors.append((platform, os_flags, low, high))
@@ -1267,9 +1261,9 @@ class ChangeHost(settings.Setting):
             if currentHost not in hostNames or hostNames[currentHost][1] == "":
                 hostNames[currentHost] = (True, socket.gethostname().partition(".")[0])
             choices = common.NamedInts()
-            for host in range(0, numHosts):
-                paired, hostName = hostNames.get(host, (True, ""))
-                choices[host] = f"{str(host + 1)}:{hostName}" if hostName else str(host + 1)
+            for host in range(numHosts):
+                _paired, hostName = hostNames.get(host, (True, ""))
+                choices[host] = f"{host + 1!s}:{hostName}" if hostName else str(host + 1)
             return cls(choices=choices, read_skip_byte_count=1) if choices and len(choices) > 1 else None
 
 
@@ -1798,7 +1792,7 @@ class BrightnessControl(settings.Setting):
                     return reply
             return super().write(device, data_bytes)
 
-    class validator_class(settings_validator.RangeValidator):
+    class validator_class(settings_validator.RangeValidator):  # noqa: F811
         @classmethod
         def build(cls, setting_class, device):
             reply = device.feature_request(_F.BRIGHTNESS_CONTROL)
@@ -1855,7 +1849,7 @@ class LEDZoneSetting(settings.Setting):
             setting.label = _("LEDs") + " " + str(hidpp20.LEDZoneLocations[zone.location])
             choices = [hidpp20.LEDEffects[e.ID][0] for e in zone.effects if e.ID in hidpp20.LEDEffects]
             ID_field = {"name": "ID", "kind": settings.Kind.CHOICE, "label": None, "choices": choices}
-            setting.possible_fields = [ID_field] + cls.possible_fields
+            setting.possible_fields = [ID_field, *cls.possible_fields]
             setting.fields_map = hidpp20.LEDEffects
             settings_.append(setting)
         return settings_
@@ -1962,7 +1956,7 @@ class PerKeyLighting(settings.Settings):
                     key = (
                         setting_class.keys_universe[i]
                         if i in setting_class.keys_universe
-                        else common.NamedInt(i, f"KEY {str(i)}")
+                        else common.NamedInt(i, f"KEY {i!s}")
                     )
                     choices_map[key] = setting_class.choices_universe
             result = cls(choices_map) if choices_map else None
@@ -1979,7 +1973,7 @@ class ForceSensing(settings_new.Settings):
     get = "get_current"
     set = "set_current"
     acceptable = "acceptable_current_key"
-    choices_universe = list(range(0, 256))
+    choices_universe = list(range(256))
     kind = settings.Kind.MAP_RANGE
 
     @classmethod
@@ -2115,7 +2109,7 @@ class AnalogButtonTuning(settings.Setting):
             s_haptics.description = _("Click haptic feedback intensity (raw device value, 0=off).")
             all_settings.append(s_haptics)
 
-        return all_settings if all_settings else None
+        return all_settings or None
 
 
 class HapticLevel(settings.Setting):
@@ -2424,7 +2418,7 @@ def check_feature_setting(device, setting_name: str) -> settings.Setting | None:
         if (
             sclass.feature
             and device.features
-            and (sclass.name == setting_name or sclass.name.endswith("_") and setting_name.startswith(sclass.name))
+            and (sclass.name == setting_name or (sclass.name.endswith("_") and setting_name.startswith(sclass.name)))
         ):
             try:
                 setting = check_feature(device, sclass)

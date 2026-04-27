@@ -44,7 +44,7 @@ if typing.TYPE_CHECKING:
     import gi
 
     gi.require_version("Gdk", "3.0")
-    from gi.repository import GLib  # NOQA: E402
+    from gi.repository import GLib
 
 logger = logging.getLogger(__name__)
 
@@ -312,8 +312,8 @@ def _match(
         d_info = DeviceInfo(
             path=device["path"].decode(),
             bus_id=bus_id,
-            vendor_id=f"{vid:04X}",  # noqa
-            product_id=f"{pid:04X}",  # noqa
+            vendor_id=f"{vid:04X}",
+            product_id=f"{pid:04X}",
             interface=None,
             driver=None,
             manufacturer=device["manufacturer_string"],
@@ -330,8 +330,8 @@ def _match(
         d_info = DeviceInfo(
             path=device["path"].decode(),
             bus_id=None,
-            vendor_id=f"{vid:04X}",  # noqa
-            product_id=f"{pid:04X}",  # noqa
+            vendor_id=f"{vid:04X}",
+            product_id=f"{pid:04X}",
             interface=None,
             driver=None,
             manufacturer=None,

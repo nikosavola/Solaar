@@ -79,7 +79,7 @@ def _scroll(tray_icon, event, direction=None):
         return
 
     # don't bother even trying to scroll if less than two devices
-    if sum(map(lambda i: i[1] is not None, _devices_info)) < 2:
+    if sum(1 for i in _devices_info if i[1] is not None) < 2:
         return
 
     # scroll events come way too fast (at least 5-6 at once) so take a little break between them
@@ -238,7 +238,7 @@ except ImportError:
         _icon.set_tooltip_markup(tooltip)
 
         if _picked_device and gtk.battery_icons_style != "solaar":
-            _ignore, _ignore, name, device = _picked_device
+            _ignore, _ignore, _name, device = _picked_device
             battery_level = device.battery_info.level if device.battery_info is not None else None
             battery_charging = device.battery_info.charging() if device.battery_info is not None else None
             tray_icon_name = icons.battery(battery_level, battery_charging)
@@ -331,7 +331,7 @@ def _add_device(device):
                 break
         while index < len(_devices_info):
             path, number, _ignore, _ignore = _devices_info[index]
-            if not path == receiver_path:
+            if path != receiver_path:
                 break
             assert number != device.number
             if number > device.number:

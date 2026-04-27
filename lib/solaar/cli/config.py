@@ -66,7 +66,7 @@ def _print_setting_keyed(s, key, verbose=True):
                 else:
                     print(s.name, s.val_to_string({k: value[str(int(k))]}))
         elif s.kind == settings.Kind.MAP_CHOICE:
-            k = next((k for k in s.choices.keys() if key == k), None)
+            k = next((k for k in s.choices if key == k), None)
             if k is None:
                 print(s.name, "=? (key not found)")
             else:
@@ -164,7 +164,7 @@ def run(receivers, args, _find_receiver, find_device):
         configuration.attach_to(dev)
         print(dev.name, f"({dev.codename}) [{dev.wpid}:{dev.serial}]")
         for s in dev.settings:
-            print("")
+            print()
             _print_setting(s)
         return
 
@@ -204,7 +204,7 @@ def run(receivers, args, _find_receiver, find_device):
     if message is not None:
         print(message)
         if result is None:
-            raise Exception(f"{setting.name}: failed to set value '{str(value)}' [{value!r}]")
+            raise Exception(f"{setting.name}: failed to set value '{value!s}' [{value!r}]")
 
     # if the Solaar UI is running tell it to also perform the set, otherwise save the change in the configuration file
     if remote:
@@ -242,9 +242,9 @@ def set(dev, setting: SettingsProtocol, args, save):
             return None, None, None
         key = args.value_key
         ikey = to_int(key)
-        k = next((k for k in setting.choices.keys() if key == k), None)
+        k = next((k for k in setting.choices if key == k), None)
         if k is None and ikey is not None:
-            k = next((k for k in setting.choices.keys() if ikey == k), None)
+            k = next((k for k in setting.choices if ikey == k), None)
         if k is not None:
             value = select_choice(args.extra_subkey, setting.choices[k], setting, key)
             args.extra_subkey = int(value)
@@ -283,11 +283,11 @@ def set(dev, setting: SettingsProtocol, args, save):
             raise Exception(f"{setting.name}: setting needs an integer value, not {args.extra2}")
         if not setting._value:  # ensure that there are values to look through
             setting.read()
-        k = next((k for k in setting._value if key == ikey or key.isdigit() and ikey == int(key)), None)
+        k = next((k for k in setting._value if key == ikey or (key.isdigit() and ikey == int(key))), None)
         if k is None and ikey is not None:
             k = next((k for k in setting._value if ikey == k), None)
         item = setting._value[k]
-        if args.extra_subkey in item.keys():
+        if args.extra_subkey in item:
             item[args.extra_subkey] = to_int(args.extra2)
             args.value_key = str(int(k))
         else:

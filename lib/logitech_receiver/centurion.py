@@ -55,7 +55,7 @@ def get_firmware_centurion(device):
 
     fw = []
     seen = set()  # track response signatures to detect duplicates
-    for index in range(0, 8):  # try up to 8 entities
+    for index in range(8):  # try up to 8 entities
         try:
             report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO, 0x10, index)
         except exceptions.FeatureCallError:
@@ -121,7 +121,7 @@ def get_firmware_centurion_sub(device):
 
     fw = []
     seen = set()
-    for index in range(0, 8):
+    for index in range(8):
         report = _centurion_sub_device_info_request(device, 0x10, index)
         if not report or len(report) < 5:
             break
@@ -423,7 +423,7 @@ class CenturionReceiver:
 
     def close(self):
         handle, self.handle = self.handle, None
-        for _n, d in self._devices.items():
+        for d in self._devices.values():
             if d:
                 d.close()
         self._devices.clear()

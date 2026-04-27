@@ -373,7 +373,7 @@ def _find_selected_device():
 
 def _find_selected_device_id():
     selection = _tree.get_selection()
-    model, item = selection.get_selected()
+    _model_sel, item = selection.get_selected()
     if item:
         return _model.get_value(item, Column.PATH), _model.get_value(item, Column.NUMBER)
 
@@ -872,7 +872,7 @@ def update(device, need_popup=False, refresh=False):
 
     else:
         path = device.receiver.path if device.receiver is not None else device.path
-        assert device.number is not None and device.number >= 0, f"invalid device number{str(device.number)}"
+        assert device.number is not None and device.number >= 0, f"invalid device number{device.number!s}"
         item = _device_row(path, device.number, device if bool(device) else None)
 
         if bool(device) and item:
@@ -896,7 +896,7 @@ def update_device(device, item, selected_device_id, need_popup, full=False):
         _model.set_value(item, Column.STATUS_TEXT, _CAN_SET_ROW_NONE)
         _model.set_value(item, Column.STATUS_ICON, _CAN_SET_ROW_NONE)
     else:
-        if battery_voltage is not None and False:  # Use levels instead of voltage here
+        if False:  # Use levels instead of voltage here
             status_text = f"{int(battery_voltage)}mV"
         elif isinstance(battery_level, NamedInt):
             status_text = _(str(battery_level))

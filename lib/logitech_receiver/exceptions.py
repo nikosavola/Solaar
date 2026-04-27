@@ -26,28 +26,23 @@ class NoReceiver(KwException):
     physically disconnected from the machine, or its kernel driver module is
     unloaded."""
 
-    pass
 
 
 class NoSuchDevice(KwException):
     """Raised when trying to reach a device number not paired to the receiver."""
 
-    pass
 
 
 class DeviceUnreachable(KwException):
     """Raised when a request is made to an unreachable (turned off) device."""
 
-    pass
 
 
 class FeatureNotSupported(KwException):
     """Raised when trying to request a feature not supported by the device."""
 
-    pass
 
 
 class FeatureCallError(KwException):
     """Raised if the device replied to a feature call with an error."""
 
-    pass

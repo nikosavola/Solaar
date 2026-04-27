@@ -78,9 +78,8 @@ def create_all_settings(all_settings: list[Setting]) -> dict[str, list[Setting]]
             prev_kind = prev_setting.validator_class.kind
             if prev_kind != s.validator_class.kind:
                 logger.warning(
-                    "ignoring setting {} - same name of {}, but different kind ({} != {})".format(
-                        s.__name__, prev_setting.__name__, prev_kind, s.validator_class.kind
-                    )
+                    f"ignoring setting {s.__name__} - same name of {prev_setting.__name__},"
+                    f" but different kind ({prev_kind} != {s.validator_class.kind})"
                 )
                 continue
             settings[s.name].append(s)
@@ -753,11 +752,7 @@ class DiversionDialog:
                 self._action_menu.menu_do_cut(None, m, it)
             elif enabled_actions.copy and e.keyval in [Gdk.KEY_c, Gdk.KEY_C] and enabled_actions.c is not None:
                 self._action_menu.menu_do_copy(None, m, it)
-            elif enabled_actions.insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]:
-                self._action_menu.menu_do_paste(
-                    None, m, it, below=enabled_actions.c is not None and not (state & Gdk.ModifierType.SHIFT_MASK)
-                )
-            elif (
+            elif (enabled_actions.insert and _rule_component_clipboard is not None and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]) or (
                 enabled_actions.insert_only_rule
                 and isinstance(_rule_component_clipboard, diversion.Rule)
                 and e.keyval in [Gdk.KEY_v, Gdk.KEY_V]
@@ -919,7 +914,7 @@ class SmartComboBox(Gtk.ComboBox):
             visible = visible_fn(value)
             self._include(model, idx, value, visible, *names)
             if visible:
-                to_complete += names if names else [str(value).strip()]
+                to_complete += names or [str(value).strip()]
         self.set_model(filtered_model)
         if self.get_has_entry() and self._completion:
             CompletionEntry.add_completion_to_entry(self.get_child(), to_complete)
@@ -1081,7 +1076,9 @@ class AllDevicesInfo:
         def dev_in_row(_store, _treepath, row):
             nonlocal updated
             device = _dev_model.get_value(row, 7)
-            if device and device.kind and (device.serial and device.serial != "?" or device.unitId and device.unitId != "?"):
+            if device and device.kind and (
+                (device.serial and device.serial != "?") or (device.unitId and device.unitId != "?")
+            ):
                 existing = self[device.serial] or self[device.unitId]
                 if not existing:
                     updated = True
@@ -1182,7 +1179,7 @@ class LaterUI(RuleComponentUI):
             self.field.set_value(component.delay)
 
     def collect_value(self):
-        return [float(int((self.field.get_value() + 0.0001) * 1000)) / 1000] + self.component.components
+        return [float(int((self.field.get_value() + 0.0001) * 1000)) / 1000, *self.component.components]
 
     @classmethod
     def left_label(cls, component):
@@ -1348,7 +1345,7 @@ class SetValueControl(Gtk.HBox):
         if not labels:
             labels = {}
         self.sub_key_widget.set_all_values(
-            map(lambda item: (item.id, labels.get(item.id, [str(item.id)])[0]), items) if items else []
+            ((item.id, labels.get(item.id, [str(item.id)])[0]) for item in items) if items else []
         )
         self.sub_key_widget.show()
         self.range_widget.show()
@@ -1359,7 +1356,7 @@ class SetValueControl(Gtk.HBox):
         self._hide_all()
         sort_key = int if all((v == extra or str(v).isdigit()) for v in values) else str
         if extra is not None and extra in values:
-            values = [extra] + sorted((v for v in values if v != extra), key=sort_key)
+            values = [extra, *sorted((v for v in values if v != extra), key=sort_key)]
         else:
             values = sorted(values, key=sort_key)
         self.choice_widget.set_all_values(values)
@@ -1635,7 +1632,7 @@ class _SettingWithValueUI:
             self.setting_field.show_only(supported_settings or None)
 
     def _update_key_list(self, setting_name, device=None):
-        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
+        setting, _val_class, kind, keys = self._setting_attributes(setting_name, device)
         multiple = kind in self.MULTIPLE
         self.key_field.set_visible(multiple)
         self.key_lbl.set_visible(multiple)
@@ -1669,7 +1666,7 @@ class _SettingWithValueUI:
             self._update_validation()
 
     def _update_value_list(self, setting_name, device=None, key=None):
-        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
+        setting, val_class, kind, _keys = self._setting_attributes(setting_name, device)
         ds = device.settings if device else {}
         device_setting = ds.get(setting_name, None)
         if kind in (Kind.TOGGLE, Kind.MULTIPLE_TOGGLE):
@@ -1714,7 +1711,7 @@ class _SettingWithValueUI:
             icon = ""
         self.device_field.get_child().set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, icon)
         setting_name = self.setting_field.get_value()
-        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
+        _setting, _val_class, kind, _keys = self._setting_attributes(setting_name, device)
         multiple = kind in self.MULTIPLE
         if multiple:
             key = self.key_field.get_value(invalid_as_str=False, accept_hidden=False)
@@ -1737,7 +1734,7 @@ class _SettingWithValueUI:
             self.setting_field.set_value(setting.name if setting else "")
             self._changed_setting()
             key = None
-            if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
+            if kind in self.MULTIPLE or (kind is None and len(self.component.args) > 3):
                 key = _from_named_ints(next(a, ""), keys)
             self.key_field.set_value(key)
             self.value_field.set_value(next(a, ""))
@@ -1749,9 +1746,9 @@ class _SettingWithValueUI:
         device = None if same else _all_devices[device_str]
         device_value = device.id if device else None if same else device_str
         setting_name = self.setting_field.get_value()
-        setting, val_class, kind, keys = self._setting_attributes(setting_name, device)
+        _setting, _val_class, kind, keys = self._setting_attributes(setting_name, device)
         key_value = []
-        if kind in self.MULTIPLE or kind is None and len(self.component.args) > 3:
+        if kind in self.MULTIPLE or (kind is None and len(self.component.args) > 3):
             key = self.key_field.get_value()
             key = _from_named_ints(key, keys)
             key_value.append(key)
@@ -1765,7 +1762,7 @@ class _SettingWithValueUI:
         device = None if not device_str else _all_devices[device_str]
         device_disp = _("Originating device") if not device_str else device.display_name if device else shlex_quote(device_str)
         setting_name = next(a, None)
-        setting, val_class, kind, keys = cls._setting_attributes(setting_name, device)
+        setting, _val_class, kind, keys = cls._setting_attributes(setting_name, device)
         device_setting = (device.settings if device else {}).get(setting_name, None)
         disp = [setting.label or setting.name if setting else setting_name]
         key = None
@@ -1798,7 +1795,7 @@ class _SettingWithValueUI:
             disp.append(_(str(value)))
         else:
             disp.append(value)
-        return device_disp + "  " + "  ".join(map(lambda s: shlex_quote(str(s)), [*disp, *a]))
+        return device_disp + "  " + "  ".join(shlex_quote(str(s)) for s in [*disp, *a])
 
 
 class SetUI(_SettingWithValueUI, ActionUI):

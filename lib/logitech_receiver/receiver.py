@@ -186,7 +186,7 @@ class Receiver:
 
     def close(self):
         handle, self.handle = self.handle, None
-        for _n, d in self._devices.items():
+        for d in self._devices.values():
             if d:
                 d.close()
         self._devices.clear()
@@ -269,7 +269,7 @@ class Receiver:
             kind = extract_device_kind(pair_info[7] & 0x0F)
             polling_rate_ms = extract_polling_rate(pair_info)
             polling_rate = f"{polling_rate_ms}ms"
-        elif not self.receiver_kind == "unifying":  # may be an old Nano receiver
+        elif self.receiver_kind != "unifying":  # may be an old Nano receiver
             device_info = self.read_register(Registers.RECEIVER_INFO, 0x04)  # undocumented
             if device_info:
                 logger.warning("using undocumented register for device wpid")
@@ -574,9 +574,7 @@ class Ex100Receiver(Receiver):
 def _get_kind_from_index(receiver, index: int) -> int:
     """Get device kind from 27Mhz device index"""
     # From drivers/hid/hid-logitech-dj.c
-    if index == 1:  # mouse
-        kind = 2
-    elif index == 2:  # mouse
+    if index == 1 or index == 2:  # mouse
         kind = 2
     elif index == 3:  # keyboard
         kind = 1

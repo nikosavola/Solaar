@@ -46,7 +46,7 @@ if typing.TYPE_CHECKING:
     from hidapi.common import DeviceInfo
 
     gi.require_version("Gdk", "3.0")
-    from gi.repository import GLib  # NOQA: E402
+    from gi.repository import GLib
 
 if platform.system() == "Linux":
     import hidapi.udev_impl as hidapi
@@ -155,9 +155,9 @@ def _bluetooth_device(product_id: int) -> dict[str, Any]:
 
 KNOWN_DEVICE_IDS = []
 
-for _ignore, d in descriptors.DEVICES.items():
+for d in descriptors.DEVICES.values():
     if d.usbid:
-        usb_interface = d.interface if d.interface else 2
+        usb_interface = d.interface or 2
         KNOWN_DEVICE_IDS.append(_usb_device(d.usbid, usb_interface))
     if d.btid:
         KNOWN_DEVICE_IDS.append(_bluetooth_device(d.btid))
@@ -508,7 +508,7 @@ def make_notification(report_id: int, devnumber: int, data: bytes) -> HIDPPNotif
 
     if (
         # standard HID++ 1.0 notification, SubId may be 0x40 - 0x7F
-        (sub_id >= 0x40)  # noqa: E131
+        (sub_id >= 0x40)
         or
         # custom HID++1.0 battery events, where SubId is 0x07/0x0D
         (sub_id in (0x07, 0x0D) and len(data) == 5 and data[4:5] == b"\x00")
@@ -518,7 +518,7 @@ def make_notification(report_id: int, devnumber: int, data: bytes) -> HIDPPNotif
         or
         # HID++ 2.0 feature notifications have the SoftwareID 0
         (address & 0x0F == 0x00)
-    ):  # noqa: E129
+    ):
         return HIDPPNotification(report_id, devnumber, sub_id, address, data[2:])
     return None
 

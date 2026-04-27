@@ -216,8 +216,8 @@ class Device:
                 self._codename = self.descriptor.codename
             if self._kind is None:
                 self._kind = self.descriptor.kind
-            self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
-            self.registers = self.descriptor.registers if self.descriptor.registers else []
+            self._protocol = self.descriptor.protocol or None
+            self.registers = self.descriptor.registers or []
 
         if self._protocol is not None:
             self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
@@ -296,7 +296,7 @@ class Device:
             self._unitId = self._serial
         hw_info = _hidpp20.get_hardware_info_centurion(self)
         if hw_info:
-            model_id, hw_revision, product_id = hw_info
+            _model_id, _hw_revision, product_id = hw_info
             self._modelId = f"{product_id:04X}"
             self._tid_map = {"usbid": f"{product_id:04X}"}
 
@@ -370,7 +370,7 @@ class Device:
     def polling_rate(self):
         if self.online and self.protocol >= 2.0:
             rate = _hidpp20.get_polling_rate(self)
-            self._polling_rate = rate if rate else self._polling_rate
+            self._polling_rate = rate or self._polling_rate
         return self._polling_rate
 
     @property
@@ -523,8 +523,8 @@ class Device:
                 if (
                     was_active is None
                     or not was_active
-                    or push
-                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
+                    or (push
+                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features))
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
@@ -598,7 +598,7 @@ class Device:
     def request(self, request_id, *params, no_reply=False):
         if self:
             long = self.hidpp_long is True or (
-                self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+                self.hidpp_long is None and (self.bluetooth or (self._protocol is not None and self._protocol >= 2.0))
             )
             # Centurion child: CPL framing strips devnumber and responses always
             # have devnumber=0xFF, so we must send 0xFF to match responses.
@@ -782,9 +782,7 @@ class Device:
         if sub_feat_idx == expected_sub_feat_idx:
             return True
         # Error response: sub_feat_idx=0xFF, next byte is the original feat_idx that errored
-        if sub_feat_idx == 0xFF and len(reply_data) >= 7 and reply_data[6] == expected_sub_feat_idx:
-            return True
-        return False
+        return sub_feat_idx == 0xFF and len(reply_data) >= 7 and reply_data[6] == expected_sub_feat_idx
 
     @staticmethod
     def _parse_bridge_response(reply_data):
@@ -841,7 +839,7 @@ class Device:
                 self.online = False
             return self.online
         long = self.hidpp_long is True or (
-            self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
+            self.hidpp_long is None and (self.bluetooth or (self._protocol is not None and self._protocol >= 2.0))
         )
         handle = self.handle or self.receiver.handle
         try:
@@ -903,5 +901,5 @@ class Device:
 
 
 # Re-export from centurion.py — must be after Device class to avoid circular import
-from .centurion import CenturionReceiver  # noqa: E402,F401
+from .centurion import CenturionReceiver  # noqa: E402
 from .centurion import create_centurion_receiver  # noqa: E402,F401

@@ -57,7 +57,7 @@ class Validator:
 
 
 class BooleanValidator(Validator):
-    __slots__ = ("true_value", "false_value", "read_skip_byte_count", "write_prefix_bytes", "mask", "needs_current_value")
+    __slots__ = ("false_value", "mask", "needs_current_value", "read_skip_byte_count", "true_value", "write_prefix_bytes")
 
     kind = Kind.TOGGLE
     default_true = 0x01
@@ -162,7 +162,7 @@ class BooleanValidator(Validator):
         else:
             to_write = bytearray(to_write)
             count = len(self.mask)
-            for i in range(0, count):
+            for i in range(count):
                 b = ord(to_write[i : i + 1])
                 m = ord(self.mask[i : i + 1])
                 assert b & m == b
@@ -247,7 +247,7 @@ class BitFieldValidator(Validator):
 
 
 class BitFieldWithOffsetAndMaskValidator(Validator):
-    __slots__ = ("byte_count", "options", "_option_from_key", "_mask_from_offset", "_option_from_offset_mask")
+    __slots__ = ("_mask_from_offset", "_option_from_key", "_option_from_offset_mask", "byte_count", "options")
 
     kind = Kind.MULTIPLE_TOGGLE
     sep = 0x01
@@ -377,7 +377,7 @@ class ChoicesValidator(Validator):
             self._byte_count = byte_count
         assert self._byte_count < 8
         self._read_skip_byte_count = read_skip_byte_count
-        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b""
+        self._write_prefix_bytes = write_prefix_bytes or b""
         assert self._byte_count + self._read_skip_byte_count <= 14
         assert self._byte_count + len(self._write_prefix_bytes) <= 14
 
@@ -458,8 +458,8 @@ class ChoicesMapValidator(ChoicesValidator):
         self.needs_current_value = False
         self.extra_default = extra_default
         self._key_postfix_bytes = key_postfix_bytes
-        self._read_skip_byte_count = read_skip_byte_count if read_skip_byte_count else 0
-        self._write_prefix_bytes = write_prefix_bytes if write_prefix_bytes else b""
+        self._read_skip_byte_count = read_skip_byte_count or 0
+        self._write_prefix_bytes = write_prefix_bytes or b""
         self.activate = activate
         self.mask = mask
         assert self._byte_count + self._read_skip_byte_count + self._key_byte_count <= 14
@@ -695,7 +695,7 @@ class MultipleRangeValidator(Validator):
     def prepare_write(self, value):
         seq = []
         w = b""
-        for item in value.keys():
+        for item in value:
             _item = self._item_from_id[int(item)]
             b = common.int2bytes(_item.index, 1)
             for sub_item in self.sub_items[_item]:

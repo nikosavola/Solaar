@@ -53,7 +53,7 @@ def _require(module, os_package, gi=None, gi_package=None, gi_version=None):
 
 battery_icons_style = "regular"
 tray_icon_size = None
-temp = tempfile.NamedTemporaryFile(prefix="Solaar_", mode="w", delete=True)
+temp = tempfile.NamedTemporaryFile(prefix="Solaar_", mode="w", delete=True)  # noqa: SIM115
 
 
 def create_parser():

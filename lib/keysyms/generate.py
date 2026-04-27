@@ -26,7 +26,7 @@ def main():
             text = Path(temp, filename).read_text()
             for name, sym, _ in findall(extraction_pattern, text):
                 sym = int(sym, 16)
-                if keysymdef.get(f"{prefix}{name}", None):
+                if keysymdef.get(f"{prefix}{name}"):
                     print(f"KEY DUP {prefix}{name}")
                 keysymdef[f"{prefix}{name}"] = sym
 

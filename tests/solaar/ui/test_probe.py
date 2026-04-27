@@ -23,7 +23,7 @@ def test_run_register_errors():
     # Define expected addresses to be called in order
     expected_addresses = []
 
-    for reg in range(0, 0xFF):
+    for reg in range(0xFF):
         expected_addresses.append((0x8100 | reg, 0))  # First short call, returns invalid_value (continue)
         expected_addresses.append((0x8100 | reg, 1))  # Second short call, returns invalid_address (stop here)
 

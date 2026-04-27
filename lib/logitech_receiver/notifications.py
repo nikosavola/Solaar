@@ -292,7 +292,7 @@ def _process_feature_notification(device: Device, notification: HIDPPNotificatio
 
     elif feature == SupportedFeature.SOLAR_DASHBOARD:
         if notification.data[5:9] == b"GOOD":
-            charge, lux, adc = struct.unpack("!BHH", notification.data[:5])
+            charge, lux, _adc = struct.unpack("!BHH", notification.data[:5])
             # guesstimate the battery voltage, emphasis on 'guess'
             # status_text = '%1.2fV' % (adc * 2.67793237653 / 0x0672)
             status_text = BatteryStatus.DISCHARGING
@@ -469,7 +469,7 @@ def handle_device_discovery(receiver: Receiver, notification: HIDPPNotification)
         if receiver.pairing.counter is None:
             receiver.pairing.counter = counter
         else:
-            if not receiver.pairing.counter == counter:
+            if receiver.pairing.counter != counter:
                 return None
         if notification.data[1] == 0:
             receiver.pairing.device_kind = notification.data[3]

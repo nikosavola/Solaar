@@ -333,7 +333,7 @@ class NamedInt(int):
             return self.name.lower() == other.lower()
         # this should catch comparisons with bytes in Py3
         if other is not None:
-            raise TypeError(f"Unsupported type {str(type(other))}")
+            raise TypeError(f"Unsupported type {type(other)!s}")
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -375,14 +375,14 @@ class NamedInts:
     raised.
     """
 
-    __slots__ = ("__dict__", "_values", "_indexed", "_fallback", "_is_sorted")
+    __slots__ = ("__dict__", "_fallback", "_indexed", "_is_sorted", "_values")
 
     def __init__(self, dict_=None, **kwargs):
         def _readable_name(n):
             return n.replace("__", "/").replace("_", " ")
 
         # print (repr(kwargs))
-        elements = dict_ if dict_ else kwargs
+        elements = dict_ or kwargs
         values = {k: NamedInt(v, _readable_name(k)) for (k, v) in elements.items()}
         self.__dict__ = values
         self._is_sorted = False
@@ -394,12 +394,12 @@ class NamedInts:
         self._fallback = None
 
     @classmethod
-    def list(cls, items, name_generator=lambda x: str(x)):  # noqa: B008
+    def list(cls, items, name_generator=lambda x: str(x)):
         values = {name_generator(x): x for x in items}
         return NamedInts(**values)
 
     @classmethod
-    def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):  # noqa: B008
+    def range(cls, from_value, to_value, name_generator=lambda x: str(x), step=1):
         values = {name_generator(x): x for x in range(from_value, to_value + 1, step)}
         return NamedInts(**values)
 
@@ -467,7 +467,7 @@ class NamedInts:
     def __setitem__(self, index, name):
         assert isinstance(index, int), type(index)
         if isinstance(name, NamedInt):
-            assert int(index) == int(name), f"{repr(index)} {repr(name)}"
+            assert int(index) == int(name), f"{index!r} {name!r}"
             value = name
         elif isinstance(name, str):
             value = NamedInt(index, name)
@@ -685,6 +685,6 @@ def _read_usb_product_string(hidraw_path):
         hidraw_name = pathlib.Path(hidraw_path).name
         product_path = pathlib.Path("/sys/class/hidraw") / hidraw_name / "device" / ".." / ".." / "product"
         product = product_path.read_text().strip()
-        return product if product else None
+        return product or None
     except (OSError, ValueError):
         return None

@@ -162,8 +162,8 @@ def _convert_json(json_dict):
     for key, dev in json_dict.items():
         key = key.split(":")
         if len(key) == 2:
-            dev[_KEY_WPID] = dev.get(_KEY_WPID) if dev.get(_KEY_WPID) else key[0]
-            dev[_KEY_SERIAL] = dev.get(_KEY_SERIAL) if dev.get(_KEY_SERIAL) else key[1]
+            dev[_KEY_WPID] = dev.get(_KEY_WPID) or key[0]
+            dev[_KEY_SERIAL] = dev.get(_KEY_SERIAL) or key[1]
             for k, v in dev.items():
                 if isinstance(k, str) and not k.startswith("_") and isinstance(v, dict):  # convert string keys to ints
                     v = {int(dk) if isinstance(dk, str) else dk: dv for dk, dv in v.items()}
@@ -248,8 +248,8 @@ def persister(device):
             _load()
         entry = None
         # some devices report modelId and unitId as zero so use name and serial for them
-        modelId = device.modelId if device.modelId != "000000000000" else device._name if device._name else None
-        unitId = device.unitId if device.unitId != "00000000" else device._serial if device._serial else None
+        modelId = device.modelId if device.modelId != "000000000000" else device._name or None
+        unitId = device.unitId if device.unitId != "00000000" else device._serial or None
         for c in _config:
             if isinstance(c, _DeviceEntry) and match(device.wpid, device._serial, modelId, unitId, c):
                 entry = c

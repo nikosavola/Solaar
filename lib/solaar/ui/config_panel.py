@@ -102,7 +102,7 @@ class Control:
 
     def init(self, sbox, delegate):
         self.sbox = sbox
-        self.delegate = delegate if delegate else self
+        self.delegate = delegate or self
 
     def changed(self, *args):
         if self.get_sensitive():
@@ -167,7 +167,7 @@ class SliderControl(Gtk.Scale, Control):
 
 
 def _create_choice_control(sbox, delegate=None, choices=None):
-    if 50 > len(choices if choices else sbox.setting.choices):
+    if len(choices or sbox.setting.choices) < 50:
         return ChoiceControlLittle(sbox, choices=choices, delegate=delegate)
     else:
         return ChoiceControlBig(sbox, choices=choices, delegate=delegate)
@@ -359,8 +359,8 @@ class MultipleToggleControl(MultipleControl):
             lbl_tooltip = None
             if hasattr(setting, "_labels"):
                 l1, l2 = setting._labels.get(k, (None, None))
-                lbl_text = l1 if l1 else lbl_text
-                lbl_tooltip = l2 if l2 else lbl_tooltip
+                lbl_text = l1 or lbl_text
+                lbl_tooltip = l2 or lbl_tooltip
             lbl = Gtk.Label(label=lbl_text)
             h.set_tooltip_text(lbl_tooltip or " ")
             control = Gtk.Switch()
@@ -392,7 +392,7 @@ class MultipleToggleControl(MultipleControl):
                 elem.set_state(v)
             if elem.get_state():
                 active += 1
-            to_join.append(f"{lbl.get_text()}: {str(elem.get_state())}")
+            to_join.append(f"{lbl.get_text()}: {elem.get_state()!s}")
         b = ", ".join(to_join)
         self._button.set_label(f"{active} / {total}")
         self._button.set_tooltip_text(b)
@@ -406,8 +406,8 @@ class MultipleRangeControl(MultipleControl):
             lbl_tooltip = None
             if hasattr(setting, "_labels"):
                 l1, l2 = setting._labels.get(int(item), (None, None))
-                lbl_text = l1 if l1 else lbl_text
-                lbl_tooltip = l2 if l2 else lbl_tooltip
+                lbl_text = l1 or lbl_text
+                lbl_tooltip = l2 or lbl_tooltip
             item_lbl = Gtk.Label(label=lbl_text)
             self.add(item_lbl)
             self.set_tooltip_text(lbl_tooltip or " ")
@@ -420,8 +420,8 @@ class MultipleRangeControl(MultipleControl):
                 lbl_tooltip = None
                 if hasattr(setting, "_labels_sub"):
                     l1, l2 = setting._labels_sub.get(str(sub_item), (None, None))
-                    lbl_text = l1 if l1 else lbl_text
-                    lbl_tooltip = l2 if l2 else lbl_tooltip
+                    lbl_text = l1 or lbl_text
+                    lbl_tooltip = l2 or lbl_tooltip
                 sub_item_lbl = Gtk.Label(label=lbl_text)
                 h.set_tooltip_text(lbl_tooltip or " ")
                 h.pack_start(sub_item_lbl, False, False, 0)
@@ -476,7 +476,7 @@ class MultipleRangeControl(MultipleControl):
             item = ch._setting_item
             v = value.get(int(item), None)
             if v is not None:
-                b += f"{str(item)}: ("
+                b += f"{item!s}: ("
                 to_join = []
                 for c in ch._sub_items:
                     sub_item = c._setting_sub_item
@@ -486,7 +486,7 @@ class MultipleRangeControl(MultipleControl):
                         sub_item_value = c._control.get_value()
                     c._control.set_value(sub_item_value)
                     n += 1
-                    to_join.append(f"{str(sub_item)}={sub_item_value}")
+                    to_join.append(f"{sub_item!s}={sub_item_value}")
                 b += ", ".join(to_join) + ") "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
@@ -539,7 +539,7 @@ class PackedRangeControl(MultipleRangeControl):
                 h.control.set_value(v)
             else:
                 v = self.sbox.setting._value[int(item)]
-            b += f"{str(item)}: ({str(v)}) "
+            b += f"{item!s}: ({v!s}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
@@ -602,7 +602,7 @@ class GraphicEQControl(MultipleControl):
                 vbox.control.set_value(v)
             else:
                 v = self.sbox.setting._value[int(item)]
-            b += f"{str(item)}: ({str(v)}) "
+            b += f"{item!s}: ({v!s}) "
         lbl_text = ngettext("%d value", "%d values", n) % n
         self._button.set_label(lbl_text)
         self._button.set_tooltip_text(b)
@@ -663,7 +663,7 @@ class HeteroKeyControl(Gtk.HBox, Control):
         if value is not None:
             for k, v in value.__dict__.items():
                 if k in self._items:
-                    (lblbox, box) = self._items[k]
+                    (_lblbox, box) = self._items[k]
                     if isinstance(box, Gtk.ColorButton):
                         rgba = Gdk.RGBA()
                         color_string = f"#{v:06X}"  # e.g. "#FF0000"
@@ -899,10 +899,7 @@ def change_setting(device, setting, values):
 
 def _change_setting(device, setting, values):
     device_path = device.receiver.path if device.receiver else device.path
-    if (device_path, device.number, setting.name) in _items:
-        sbox = _items[(device_path, device.number, setting.name)]
-    else:
-        sbox = None
+    sbox = _items.get((device_path, device.number, setting.name))
     _write_async(setting, values[-1], sbox, None, key=values[0] if len(values) > 1 else None)
 
 

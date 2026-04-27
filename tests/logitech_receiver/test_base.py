@@ -82,7 +82,7 @@ def test_filter_products_of_interest(product_id, bus, hidpp_short, hidpp_long, e
     if expected is None:
         assert receiver_info == expected
     else:
-        assert all([receiver_info[key] == expected_value for key, expected_value in expected.items()])
+        assert all(receiver_info[key] == expected_value for key, expected_value in expected.items())
         assert receiver_info["vendor_id"] == LOGITECH_VENDOR_ID
         assert receiver_info["product_id"]
 
