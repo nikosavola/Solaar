@@ -1076,8 +1076,10 @@ class AllDevicesInfo:
         def dev_in_row(_store, _treepath, row):
             nonlocal updated
             device = _dev_model.get_value(row, 7)
-            if device and device.kind and (
-                (device.serial and device.serial != "?") or (device.unitId and device.unitId != "?")
+            if (
+                device
+                and device.kind
+                and ((device.serial and device.serial != "?") or (device.unitId and device.unitId != "?"))
             ):
                 existing = self[device.serial] or self[device.unitId]
                 if not existing:

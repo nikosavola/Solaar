@@ -48,6 +48,6 @@ def test_run_register_errors():
         run([mock_receiver], mock_args, None, None)
 
         # Evaluate that the addresses called match the expected addresses
-        assert (
-            called_addresses == expected_addresses
-        ), f"Called addresses {called_addresses} do not match expected {expected_addresses}"
+        assert called_addresses == expected_addresses, (
+            f"Called addresses {called_addresses} do not match expected {expected_addresses}"
+        )

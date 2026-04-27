@@ -109,7 +109,7 @@ def _print_centurion_dongle_features(receiver):
                 print(f"          Serial: {serial}")
             if hw_info:
                 model_id, hw_rev, product_id = hw_info
-                print(f"          Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
+                print(f"          Hardware: model {model_id}  rev {hw_rev}  product {product_id:04X}")
 
 
 def _battery_text(level) -> str:
@@ -337,7 +337,7 @@ def _print_device(dev, num=None):
                     print(f"            Serial: {serial}")
                 if hw_info:
                     model_id, hw_rev, product_id = hw_info
-                    print(f"            Hardware: model {model_id}" f"  rev {hw_rev}  product {product_id:04X}")
+                    print(f"            Hardware: model {model_id}  rev {hw_rev}  product {product_id:04X}")
             elif isinstance(feature, SupportedFeature) and feature == SupportedFeature.DEVICE_FW_VERSION:
                 for fw in _hidpp20.get_firmware(dev):
                     extras = strhex(fw.extras) if fw.extras else ""

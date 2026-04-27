@@ -621,8 +621,7 @@ class Process(Condition):
         if (not wayland and not x11_setup()) or (wayland and not gnome_dbus_interface_setup()):
             if warn:
                 logger.warning(
-                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome "
-                    "extension - %s",
+                    "rules can only access active process in X11 or in Wayland under GNOME with Solaar Gnome extension - %s",
                     self,
                 )
         if not isinstance(process, str):

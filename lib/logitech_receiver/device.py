@@ -54,20 +54,15 @@ _hidpp20 = hidpp20.Hidpp20()
 
 
 class LowLevelInterface(Protocol):
-    def open_path(self, path) -> int:
-        ...
+    def open_path(self, path) -> int: ...
 
-    def find_paired_node(self, receiver_path: str, index: int, timeout: int):
-        ...
+    def find_paired_node(self, receiver_path: str, index: int, timeout: int): ...
 
-    def ping(self, handle, number, long_message: bool):
-        ...
+    def ping(self, handle, number, long_message: bool): ...
 
-    def request(self, handle, devnumber, request_id, *params, **kwargs):
-        ...
+    def request(self, handle, devnumber, request_id, *params, **kwargs): ...
 
-    def close(self, handle, *args, **kwargs) -> bool:
-        ...
+    def close(self, handle, *args, **kwargs) -> bool: ...
 
 
 def create_device(low_level: LowLevelInterface, device_info, setting_callback=None):
@@ -523,8 +518,7 @@ class Device:
                 if (
                     was_active is None
                     or not was_active
-                    or (push
-                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features))
+                    or (push and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features))
                 ):
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)

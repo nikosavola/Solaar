@@ -257,7 +257,7 @@ class MouseClickUI(ActionUI):
 
     @classmethod
     def right_label(cls, component):
-        return f'{component.button} ({"x" if isinstance(component.count, int) else ""}{component.count})'
+        return f"{component.button} ({'x' if isinstance(component.count, int) else ''}{component.count})"
 
 
 class ExecuteUI(ActionUI):

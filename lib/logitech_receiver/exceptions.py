@@ -27,22 +27,17 @@ class NoReceiver(KwException):
     unloaded."""
 
 
-
 class NoSuchDevice(KwException):
     """Raised when trying to reach a device number not paired to the receiver."""
-
 
 
 class DeviceUnreachable(KwException):
     """Raised when a request is made to an unreachable (turned off) device."""
 
 
-
 class FeatureNotSupported(KwException):
     """Raised when trying to request a feature not supported by the device."""
 
 
-
 class FeatureCallError(KwException):
     """Raised if the device replied to a feature call with an error."""
-
